@@ -47,12 +47,7 @@ const TypingEffect = ({
     }, [strings, typeSpeed, loop, backSpeed]);
     // 渲染包含ref的元素
     return (
-        <div className="font-extrabold
-        text-lg
-        italic
-        text-center 
-        rainbow-text"
-        >
+        <div className="rainbow-text">
             <span ref={el} />
         </div>
     );
