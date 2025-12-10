@@ -1,0 +1,21 @@
+.navigation {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background-color: cadetblue;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.navigationItem {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: white;
+    text-decoration: none;
+    margin-right: 1rem;
+}
+
+.navigationItem:hover {
+    text-decoration: underline;
+    text-decoration-color: lightcoral;
+}
