@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import styles from './Navigation.module.css';
 
 type NavigationItemType = {
     href: string;
@@ -12,12 +13,12 @@ const NavigationItem: NavigationItemType[] = [
 
 export default function Navigation () {
     return (
-        <nav className="fixed w-full bg-gray-800 p-4 top-0 left-0 right-0 z-50 flex items-center gap-8 h-16">
+        <nav className={styles.navigation}>
             {NavigationItem.map((item) => (
                 <Link
                     key={item.href}
                     href={item.href}
-                    className="text-lg text-white hover:text-gray-300"
+                    className={styles.navigationItem}
                 >
                     {item.text}
                 </Link>
