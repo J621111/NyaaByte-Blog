@@ -1,8 +1,9 @@
 "use client";
 import { useState } from "react";
 import WelcomeImage from "components/WelcomeImage";
-import Navigation from "components/Navigation";
+import Navigation from "components/Navigation/Navigation";
 import TypingEffect from "components/TypingEffect";
+import MasonryContainer from "components/MasonryCard/MasonryContainer";
 
 export default function HomePage() {
     // 控制内容显示
@@ -22,19 +23,13 @@ export default function HomePage() {
             {showContent &&
             <>
                 <Navigation />
-                <div className="mt-16">
-                <img
-                    src="https://cdn.jsdelivr.net/gh/J621111/Image-Hosting/img/104453964_p0_master1200.jpg"
-                    alt="Welcome to NyaaByte little world!"
-                    className="w-full h-auto"
-                />
                 <TypingEffect
                     strings={welcomText}
                     typeSpeed={100}
                     loop={true}// 循环播放
                     backSpeed={50}
                 />
-                </div>
+                <MasonryContainer />
             </>
             }
         </>
