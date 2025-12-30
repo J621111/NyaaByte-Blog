@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 
-const DISPLAY_DURATION_SECONDS = 5;
+const DISPLAY_DURATION_SECONDS = 2;
 
 const ImageStyle: React.CSSProperties = {
     width: '100%',
