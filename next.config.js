@@ -1,5 +1,3 @@
-const { withContentlayer } = require ('next-contentlayer');
-
 /** @type {import('next').NextConfig} */
 const config = {
   // 基础配置
@@ -21,6 +19,12 @@ const config = {
     // 使用 remotePatterns 字段来指定允许远程图片的域名
     remotePatterns: [
       {
+        protocol: 'http',
+        port: '1337',
+        hostname: 'localhost',
+        pathname: '/uploads/**',
+      },
+      {
         protocol: 'https',
         hostname: 'cdn.jsdelivr.net',
         port: '',
@@ -34,5 +38,4 @@ const config = {
 };
 
 // 导出配置
-// 将 Contentlayer 包装器应用于 Next.js 配置
-module.exports = withContentlayer(config);
+module.exports = config;
