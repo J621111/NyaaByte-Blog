@@ -1,40 +1,37 @@
-import { allPosts } from "contentlayer/generated";
-import { format, parseISO } from "date-fns";
-import { useMDXComponent } from "next-contentlayer/hooks";
-import MDXComponents from "components/mdxComponents";
-import { notFound } from "next/navigation";
+import { getPostBySlug, getAllPosts } from '../../lib/posts';
+import { format } from 'date-fns';
+import { notFound } from 'next/navigation';
+import { MDXRemote } from 'next-mdx-remote/rsc';
+import MDXComponents from 'components/mdxComponents';
+import styles from './post.module.css'; 
 
-export const generateStaticParams = async () => {
-    return allPosts.map((post) => ({slug: post.slug}));
+export async function generateStaticParams() {
+  const posts = getAllPosts();
+  return posts.map(p => ({ slug: p.slug }));
 }
 
-export const generateMetadata = ({ params }: { params: {slug: string}}) => {
-    const post = allPosts.find((post) => post.slug === params.slug);
-    if (!post) notFound();
-    return {title: post.title}
-}
+export default async function PostPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const post = getPostBySlug(slug);
+  
+  if (!post) notFound();
+  
+  const date = format(new Date(post.date), 'MMMM dd, yyyy');
 
-const PostLayout = ({ params }: { params: {slug: string}}) => {
-    const post = allPosts.find((post) => post.slug === params.slug);
-    if (!post) notFound();
-    
-    const MDXContent = useMDXComponent(post.body.raw);
-    
-    return (
-        <article className="mx-auto max-w-xl py-8">
-            <div className="mb-8 text-center">
-                <time dateTime={post.date} className="mb-1 text-xs text-gray-500">
-                    {format(parseISO(post.date), "LLL dd, yyyy")}
-                </time>
-                <h1 className="text-3xl font-bold">{post.title}</h1>
-            </div>
-            <div 
-                className="[&>*]:mb-3 [&>*:last-child]:mb-0" 
-            >
-                <MDXContent components={MDXComponents} />
-            </div>
-        </article>
-    )
-}
+  return (
+    <article className={styles.articleContainer}>
+      <header className={styles.header}>
+        <time className={styles.date}>{date}</time>
+        <h1 className={styles.title}>{post.title}</h1>
+      </header>
+      
+      <div className={styles.content}>
+        <MDXRemote source={post.content} components={MDXComponents} />
+      </div>
 
-export default PostLayout;
+      <div style={{ textAlign: 'center', marginTop: '40px', fontSize: '1.5rem' }}>
+        ( ฅ^•ﻌ•^ฅ )
+      </div>
+    </article>
+  );
+}
