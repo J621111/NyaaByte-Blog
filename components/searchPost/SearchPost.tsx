@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import PostCard from "components/postCard";
+import PostCard from "components/postCard/postCard";
 import type { Post } from "app/lib/posts";
 import styles from "./search.module.css";
 
