@@ -4,9 +4,9 @@ import styles from "./MasonryCard.module.css";
 
 export interface MasonryCardProps {
     id?: string | number;
-    title: string;
-    image: string;
     content: string;
+    image: string;
+    title?: string;
     variant?: "default" | "wide" | "tall";
 }
 
@@ -28,7 +28,7 @@ export default function MasonryCard({ title, image, content, variant = "default"
             <div style={{marginBottom: "1rem"}}>
             <Image
                 src={image}
-                alt={title}
+                alt="图片"
                 height={40}
                 width={40}
                 style={{objectFit: "contain"}}
