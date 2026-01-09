@@ -1,4 +1,5 @@
 import styles from './footer.module.css';
+import Image from 'next/image';
 
 export default function Footer() {
   return (
@@ -18,10 +19,9 @@ export default function Footer() {
       </div>
 
       <div className={styles.socialLinks}>
-        <a href="https://github.com/J621111" target="_blank" className={styles.linkItem} title="GitHub">🐱</a>
-        <a href="https://twitter.com/NyaaByte" target="_blank" className={styles.linkItem} title="Twitter">🐦</a>
-        <a href="mailto:hello@nyaabyte.com" className={styles.linkItem} title="Email">💌</a>
-        <a href="/rss.xml" className={styles.linkItem} title="RSS">📡</a>
+        <a href="https://github.com/J621111" target="_blank" className={styles.linkItem} title="GitHub">
+          <Image src="https://cdn.jsdelivr.net/gh/J621111/Image-Hosting/img/github.svg" width={50} height={50} alt="GitHub" />
+        </a>
       </div>
 
       <p className={styles.copyRight}>
