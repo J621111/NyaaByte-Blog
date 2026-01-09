@@ -1,0 +1,213 @@
+---
+title: Next.js App Router
+date: 2025-11-29T22:12:03.284Z
+description: Next.js App Router's simple introduction.
+---
+
+import { Suspense } from "react";
+
+# Next.js App Router
+*随着next.js版本的更新，一种新的路由方式出现了，今天我将为大家介绍一下app router（如有哪里不对，请指正，谢谢喵）。*
+
+## App Router 的基础概念
+
+### App Router 简介
+
+#### What?
+App Router 是 next.js 后正式引入的新一代路由与渲染架构，默认服务端优先。
+
+#### The main difference？
+1. 渲染位置：App Router 默认 Server Component，Pages Router 默认 Client Component
+2. 数据获取：App Router ：组件内直接 async/await fetch，可并行，Pages Router ：页面级 getStaticProps/getServerSideProps
+3. 布局：App Router : layout.ts 文件即布局，可无限嵌套，跨路由复用，Pages Router : _app.ts 手动拼接，无嵌套
+4. 加载/错误态：App Router : loading.ts / error.ts 文件即边界，自动生效，Pages Router : 自己写 status
+5. 流式输出：App Router : 原生`<Suspense /> `+ 流式 HTML，首屏更快， Pages Router : 不支持
+6. 客户端体积：App Router : 仅 'use client' 及其依赖下发，Pages Router : 整页JS打包
+
+#### Why?
+1. 性能好：首屏快，JS少，并发高
+2. 体验好：布局嵌套 + loading 边界，服务端首屏 + 客户端交互
+3. 成本低：JS体积小，CDN流量少
+
+## 核心架构理念
+
+### RSC概念
+RSC 即 React Server Components，整个 RSC 可以理解为 Server Components + Client Components ，二者协作构建完整 UI。 既允许组件在服务端渲染，生成静态结果，无需将全部代码打包传到客户端，使JS体积小，同时又有 Client Componets 支持动态交互（只需在代码第一行加上 'use client'）。当然 Client Components 并不是只在客户端进行渲染，它同样也会在服务端渲染 HTML，只不过它携带了可以被浏览器“激活”的 JS。  
+  
+RSC的渲染过程分为三个阶段，首先在服务器上进行渲染，生成React元素树，然后序列化，将其转化为可传输的形式，最后反序列化，浏览器接收后将其转化为React可理解的格式再进行渲染。
+
+### 流式渲染
+流式渲染指的是将HTML分块（chunk）并逐块发送到客户端，由于无需等待整个页面完全生成后再发送，该技术能够明显提升首屏速度。  
+  
+流式渲染的过程：浏览器先收到Transfer-Ecoding: chunked 响应头，然后每个chunk独立包装，当遇到用`<Suspense />`包裹的异步组件时，先发一个chunk，将带占位符的html冲出去，浏览器解析完CSS，出现骨架屏，然后数据就绪后，再发一个chunk，一段 inline script，浏览器接收到后，将占位符换成真实数据，完成注水。  
+  
+与RSC的叠加：RSC用的不是纯html，而是自定义的 Flight JSON 格式，每算完一个 Server Component，就将对应的“子树描述”作为独立chunk推给前端，前端逐步反序列化，再塞进已有的UI树。  
+
+### 组件级数据获取
+将查库或是调接口的代码直接写在组件内部，而不是用全局数据获取（getServerSideProps），兄弟组件可并行查询（async/await读库），互不影响，并且这段代码不会下发到浏览器，只有 Server Component 能直接 import 数据库驱动，安全又高效。
+
+### 缓存、校验与请求记忆
+1. 缓存：next.js 的 App Router 对 fetch API 作了扩展，将其接入了底层的数据缓存，每一个 fetch 都可以独立配置其缓存行为。fetch 的三种策略模式：
+- 静态渲染：```{ cache: 'force-cache' } ```，适用于内容不常变的情况，如博客文章、文档等。
+- 动态渲染：```{ cache: 'no-store' } ```，适用于内容需要实时更新的情况，如个性化推荐等。
+- 增量更新（ISR）：```{ next: { revalidate: 60 }}```，ISR 和动态渲染的区别是内容是定时更新的而不是实时更新，但是更新的速度也是非常快的，适用于能够接受分钟级延迟的情况，比如商品详情页等。
+2. 校验：缓存虽然好，但是数据总有过期的时候，这时候就需要校验，判断数据何时更新。校验方法有两种：
+- 根据时间校验，通过 ```{ next: { revalidate: 30 }}```告诉 next.js 数据缓存的时间，30秒过后发起的第一个请求返回的仍然是旧数据，同时后台请求新数据，更新缓存，下一次请求看到的就是新的内容。
+- 按需校验：无需等计时器，可以在数据变化时立即更新缓存。revalidatePath('/')，可以删除指定目录下的缓存，revalidateTag('collection')，在发起 fetch 请求时打上标签，所有相同标签的请求都会被更新，而不影响其他不相关的缓存。
+3. 请求记忆：当你请求的数据在多个文件中要用到时，你可以放心地在每个文件中写相同的 fetch。next.js 会发现这些请求的参数和 url 是一致的，在同一个渲染周期内该请求只会执行一次，剩下的进行数据复用。
+
+## 项目结构与路由系统
+
+### 文件系统路由
+文件夹 + 文件的名字和位置，就是路由本身
+app/
+global.css
+layout.tsx
+page.tsx                   ->   /
+about/
+  page.tsx              ->   /about
+blog/
+  [slug]/
+    page.tsx          ->   /blog/:slug
+    [...catchAll]/
+    page.tsx          ->   /blog/(.*)
+    (marketing)/
+    pricing/
+      page.tsx      ->   /pricing  (括号=路由分组，不影响URL)
+  
+  文件夹 = 路由片段，page.tsx决定该级路由是否可访问，layout.tsx引用global.css，决定所有页面基础样式，可复用可嵌套。  
+  
+动态路由：适用于内容多或者需要持续更新（电商、博客等）
+1. [foldername]：用[]将文件夹名字括起来，该路由的名字会作为 param prop 传给 layout、page、route 以及 generateMetadata 函数，举个例子，在 app/blog 目录下新建文件夹 [slug] ，新建文件 page.tsx，代码如下：
+``` typescript
+export default function Page ({ params }) {
+    return <div>My Post: { param.slug }</div>
+ }
+ ```
+当你访问 /blog/a 时，param 的值为 ```{ slug : a }```，以此类推。
+2. [...foldername]：在 foldername 前加上 ... 意味着捕获后面所有的路由片段，app/blog/[...slug]/page.tsx 会匹配 /blog/tech，也会匹配 /blog/tech/frontend，以及 /blog/tech/frontend/next.js等，举个例子，[...slug]文件夹下 page.tsx 的代码如下：
+``` typescript
+export default function Page ({ params }) {
+    return <div>My Post: { JSON.stringify { params} }</div>
+}
+```
+当你访问 /blog/tech 时，param 的值为 ```{ slug : ['tech'] }```，
+   当你访问 /blog/tech/frontend 时，param 的值为 ```{ slug : ['tech', 'frontend'] }```，以此类推
+3. [[...foldername]]：这种形式和上一种的区别是可选根目录，当你访问 /blog 时，param 的值为 {}
+
+  路由组：在app目录下，文件名通常会映射到 url 上，可以通过路由组的方式，防止其映射到 url 上，将文件名写在括号里，(filename)，可以根据逻辑将路由和文件分组，like this：
+app/
+(marketing)
+  About
+    page.tsx
+     Blog
+    page.tsx
+  （shop)
+  Account
+    page.tsx
+  
+  当然你也可以用这种方式创建不同的布局，like this：
+  app/
+  layout.tsx
+  (shop)
+      layout.tsx
+      Account
+        page.tsx
+          Cart
+        page.tsx
+      Checkout
+      page.tsx
+    从该结构中可以看出，checkout、account、cart是同一级路由，但是 account 和 cart 使用的布局是 (shop)/layout.tsx 以及 app/layout.tsx，而 checkout 使用的是 app/layout.tsx。
+    
+    除了上述两个好处以外，还可以创建多个根布局，当然你要先删除 app 目录下的 layout.tsx，like this：
+    app/
+    (marketing)
+      layout.tsx
+        (shop)
+      layout.tsx
+    不过要特别注意，因为是根布局，所以要有`<html />` 和 ``<body />`` 标签。这适用于当你将前台的购买页面和后台的管理页面放在一起的情况下。
+    
+    平行路由：这使得你可以在一个布局中同时或者有条件地渲染一个或多个页面。使用方法就是在文件夹名前加@,@foldername，这个文件夹下的 page.tsx 就会自动注入到文件夹同级的 layout.tsx 中，例如你现在想将用户数据和商品数据放在同一页：
+``` typescript
+// layout.tsx
+export default function Layout ({ props }) {
+    return (
+        { props }
+        { props.userdata }
+        { props.goodsdata }
+     )
+ }
+ ```
+另外一种应用场景是有条件的渲染，比如根据是否登录来决定页面的呈现。除此之外，平行路由也可以让你为每个路由提供独立的错误处理和加载界面，并且 foldername 不会影响 url 。
+    
+拦截路由：拦截路由允许你在当前布局加载其他部分的路由，举个例子，当你浏览某个网站时，你点开某个图片，会有一个弹窗展示这个图片，并且你发现此时路由已经发生了改变，你将此时的 url 分享给别人，点开后发现展示出来的并不是弹窗，而是一个页面，这就是拦截路由的作用，在当前页面上下文中显示目标页面的内容，而不进行完整的页面跳转。
+怎么用呢：首先它是通过特殊的文件命名约定来实现0的，(.)foldername表示在同级路由中找对应文件名进行路由拦截，(..)foldername表示在上一级找，(...)foldername表示在根目录下查找，(..)(..)表示在上两级找，要注意的是(.)foldername文件夹下的结构要和要拦截的保持一致，当然如果你想实现弹窗的效果则需配合平行路由 @modal 来实现。
+
+## Route Handlers（API 路由）
+  如果需要写给外部调用的 API 就要用到 Route Handlers。它让你在 app/ 目录下写一份 route.ts ，就可以直接处理 HTTP 请求，相当于内置了一份后端 API。支持 GET、POST 等 HTTP 方法。like this：
+``` typescript
+// route.ts
+export async function GET(request) {
+    return new Response (
+        JSON.stringify({ message: 'Ciallo NCUHOME!' })
+        {
+            status: 200,
+            headers: { 'Content-Type': 'application/json' }
+         }
+     )
+}
+```
+
+## 从“读”到“写”：Server Actions
+Server Actions ：无缝衔接前后端的优雅革命。在过去，当你收集用户评论时，你需要先写好组件，然后在后端写好 API ，再经过 Post、 Fetch，然后后端与数据库沟通，处理数据，最后后端向前端返回结果。这时候你就不得不想，要是前端能直接向服务器请求就好了，而 Server Actions 就是 Next.js 为你提供的解决方法。  
+    
+Server Actions 其实就是一个普通的异步函数，只不过它可以在服务端环境执行，在定义它时，你需要用 "use server" 给它添加一个特殊标记，让 nexxt.js 知道这个函数要在服务器上执行。当然，并不是所有情况下都用它来解决，对于需要被外部服务（如第三方应用）调用的场景，传统 API 还是最佳选择。  
+    
+Server Actions 与 html 的``<form />``标签天然集成，即使用户的浏览器禁用 javascript，基础的表单提交依然可以工作。这就是所谓的渐进式增强。你定义的 Server Action 函数会被传递给``<form />``的 action。  
+    
+useFormStatus 是一个专门为 Server Action 表单设计的 Hook，它使得我们可以获取 form 的提交状态，从而使表单在提交时按钮可以处于禁用状态。而 useFormState 则是允许 Server Actions 返回一个状态，用于向客户端返回处理结果，告诉用户成功、失败等等。使用这个 Hook 的时候，Server Action 的第一个参数会变成 previousState，并且会返回一个新的 formaction 给``<form />``使用，以及一个 state，我们可以用 state.message 将其呈现在页面上。
+
+## Metadata API 与 SEO
+SEO 即 Search Engine Optimization，搜索引擎优化 ，目的是提高网站在搜索引擎中的自然排名，从而获得更多的免费流量。而 Metadata API 让你能够以声明式的方式为每个页面设置 SEO 元数据，提高网站的搜索引擎表现。
+
+### 静态元数据
+对与内容固定的页面，只需要在 layout.tsx/page.tsx 导出元数据。export const metadata : Metadata 导出的数据包括 title、description、keywords。
+
+### 动态元数据
+对于动态路由(比如blog/[slug])，title 会随着文章内容而改变，这时我们就要用到 generateMetadata 函数， like this：
+```typescript
+// app/blog/[slug]/page.tsx
+import { Metadata } from 'next'
+
+type Props = {
+    params: Promise<{ slug: string }>
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+    const slug = (await params).slug
+    const res = await fetch(`https://api.example.com/post/${slug}`)
+    const post = await res.json()
+    
+    return {
+        title: post.title,
+        description: post.description,
+        openGraph: {
+            images: [post.imageUrl] // 社交媒体分享图
+         },
+      }
+ }
+```
+
+### 基于文件的元数据
+next.js 还支持通过“特定文件名”自动生成对应的 SEO 相关的特殊文件，只需将这些文件放在 app/ 目录下：
+- favicon.ico 浏览器的图标
+- robots.txt 告诉爬虫哪些能爬
+- sitemap.xml 站点地图
+- opengraph-image.png 社交媒体分享时的预览图
+
+###  继承与合并
+Metadata 遵循层级继承原则
+- 如果在 layout.tsx 定义了 title 而 page.tsx 没有定义，就会用 layout.tsx 中的 title 。
+- 如果 page.tsx 定义了标题，则会覆盖掉 layout 中的，而其他的字段（如 description）则会进行浅合并。  
+  
+以上就是我对 App Router 的简单介绍（好像太长了😢😅），感谢阅读喵。
