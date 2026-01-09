@@ -1,3 +1,7 @@
+const withMDX = require('@next/mdx')({
+  extension: /\.mdx?$/,
+});
+
 /** @type {import('next').NextConfig} */
 const config = {
   // 基础配置
@@ -8,7 +12,6 @@ const config = {
 
   // 静态导出配置
   output: 'export',
-  distDir: 'dist',
 
   // 图片配置 (使用 next/image)
   images: {
@@ -38,4 +41,4 @@ const config = {
 };
 
 // 导出配置
-module.exports = config;
+module.exports = withMDX(config);
