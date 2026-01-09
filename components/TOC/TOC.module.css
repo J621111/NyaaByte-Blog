@@ -1,0 +1,54 @@
+.tocWrapper {
+  position: sticky;
+  top: 100px;
+  height: fit-content;
+  width: 220px;
+  margin-left: 40px;
+}
+
+.tocContainer {
+  background: white;
+  border: 3px solid #f0f0f0;
+  border-radius: 24px;
+  padding: 20px;
+  box-shadow: 8px 8px 0px #ffe4e1;
+}
+
+.tocTitle {
+  font-weight: bold;
+  color: #ff7eb9;
+  margin-bottom: 12px;
+  border-bottom: 2px dashed #ffe4e1;
+  padding-bottom: 8px;
+  text-align: center;
+}
+
+.tocList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.tocList li {
+  margin-bottom: 8px;
+}
+
+.tocList a {
+  text-decoration: none;
+  color: #ffb7c5;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+  display: block;
+}
+
+.tocList a:hover {
+  color: #ff7eb9;
+  transform: translateX(5px);
+}
+
+.itemH1 { font-weight: bold; }
+.itemH2 { padding-left: 15px; font-size: 0.85rem; }
+
+@media (max-width: 1100px) {
+  .tocWrapper { display: none; }
+}
