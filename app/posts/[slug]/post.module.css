@@ -57,7 +57,7 @@
   margin-bottom: 1.5rem;
 }
 
-.content h2, .content h3 {
+.content h2, .content h3, .content h1, .content h4 {
   color: #ff7eb9;
   margin-top: 2rem;
   margin-bottom: 1rem;
