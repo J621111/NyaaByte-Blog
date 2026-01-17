@@ -6,7 +6,7 @@ export default function Footer() {
     <footer className={styles.footer}>
       <div className={styles.mottoSection}>
         <span className="rainbow-text" style={{ fontSize: '1.8rem' }}>
-          "Ciallo~ 方糖，是甜的。"
+          "Ciallo~ Welcome to my blog!"
         </span>
       </div>
 
