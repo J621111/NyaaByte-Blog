@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 
-const DISPLAY_DURATION_SECONDS = 2;
+const DISPLAY_DURATION_SECONDS = 1;
 const FADE_DURATION_MS = 1000;
 
 const ImageStyle: React.CSSProperties = {
