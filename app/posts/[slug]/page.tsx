@@ -7,7 +7,8 @@ import MDXComponents from 'components/mdxComponents';
 import { getTableOfContents } from '../../lib/posts';
 import TOC from 'components/TOC/TOC';
 import rehypeSlug from 'rehype-slug';
-import styles from './post.module.css'; 
+import styles from './post.module.css';
+import WalineComment from 'components/comment';
 
 export async function generateStaticParams() {
   const posts = getAllPosts();
@@ -26,7 +27,8 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
 
   return (
     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'flex-start', maxWidth: '1200px', margin: '0 auto' }}>
-      
+
+      <div style={{ flex: 1, maxWidth: '700px', margin: '0 20px' }}>
       <article className={styles.articleContainer} style={{ flex: 1, margin: '40px 0' }}>
         <header className={styles.header}>
           <time className={styles.date}>{format(new Date(post.date), 'MMMM dd, yyyy')}</time>
@@ -50,6 +52,11 @@ export default async function PostPage({ params }: { params: Promise<{ slug: str
         </div>
       </article>
 
+      <div className={styles.commentWrapper}>
+        <WalineComment />
+      </div>
+    </div>
+    
       {/* 侧边目录 */}
       <TOC headings={headings} />
     </div>

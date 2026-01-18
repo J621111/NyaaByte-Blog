@@ -76,3 +76,24 @@
   border-radius: 20px;
   border: 3px solid #f0f0f0;
 }
+
+.commentWrapper {
+  margin-bottom: 80px;
+  padding: 40px;
+  background-color: #ffffff;
+  border: 4px solid #f0f0f0;
+  border-radius: 32px;
+  box-shadow: 12px 12px 0px #ffe4e1; 
+}
+
+.commentWrapper::before {
+  content: "✿ Comments ✿";
+  display: inline-block;
+  background: #ffb7c5;
+  color: white;
+  padding: 4px 15px;
+  border-radius: 20px;
+  font-weight: bold;
+  font-size: 0.8rem;
+  margin-bottom: 20px;
+}
