@@ -1,6 +1,11 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
+  --waline-theme-color: #ff7eb9 !important;
+  --waline-active-color: #ffb7c5 !important;
+  --waline-badge-color: #ff7eb9 !important;
+  --waline-border-radius: 16px !important;
+  --waline-box-shadow: none !important;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -43,9 +48,24 @@ body {
   color: transparent;
   -webkit-background-clip: text;
   background-clip: text;
-  /* 添加动画效果 */
   animation: rainbow-text-animation 10s linear infinite alternate;
   font-size: 3rem;
   font-style: italic;
   font-weight: bold;
+}
+
+.wl-editor, .wl-input {
+  border: 2px solid #f0f0f0 !important;
+}
+
+.wl-editor:focus, .wl-input:focus {
+  border-color: #ffb7c5 !important;
+}
+
+.wl-power {
+  display: none;
+}
+
+.wl-action i {
+  color: #ff7eb9;
 }
