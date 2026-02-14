@@ -10,14 +10,16 @@ import rehypeSlug from 'rehype-slug';
 import styles from './post.module.css';
 import WalineComment from 'components/comment';
 
+export const revalidate = 60;
+
 export async function generateStaticParams() {
-  const posts = getAllPosts();
+  const posts = await getAllPosts();
   return posts.map(p => ({ slug: p.slug }));
 }
 
 export default async function PostPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const post = getPostBySlug(slug);
+  const post = await getPostBySlug(slug);
   
   if (!post) notFound();
 

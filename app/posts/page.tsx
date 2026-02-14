@@ -12,9 +12,12 @@ const titleStyle = {
     textAlign: "center" as const
 }
 
-export default function PostsListPage() {
+export const revalidate = 60;
+
+export default async function PostsListPage() {
   // 在服务端获取数据
-  const allPosts = getAllPosts().sort((a, b) =>
+  const posts = await getAllPosts();
+  const allPosts = posts.sort((a, b) =>
     compareDesc(new Date(a.date), new Date(b.date))
   );
 
