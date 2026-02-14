@@ -41,7 +41,7 @@ async function getPostsFromGitHub(): Promise<Post[]> {
           'Authorization': `Bearer ${GITHUB_TOKEN}`,
           'Accept': 'application/vnd.github.v3+json',
         },
-        next: { revalidate: 60 }, // Revalidate every 60 seconds
+        cache: 'no-store',
       }
     );
 
@@ -61,7 +61,7 @@ async function getPostsFromGitHub(): Promise<Post[]> {
       mdxFiles.map(async (file: any) => {
         try {
           const contentResponse = await fetch(file.download_url, {
-            next: { revalidate: 60 },
+            cache: 'no-store',
           });
           
           if (!contentResponse.ok) {
@@ -87,8 +87,7 @@ async function getPostsFromGitHub(): Promise<Post[]> {
       })
     );
 
-    return (posts as (Post | null)[])
-      .filter((post): post is Post => post !== null)
+    return (posts.filter(post => post !== null) as Post[])
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   } catch (error) {
     console.error('Error fetching posts from GitHub:', error);
@@ -106,7 +105,7 @@ async function getPostFromGitHub(slug: string): Promise<Post | undefined> {
           'Authorization': `Bearer ${GITHUB_TOKEN}`,
           'Accept': 'application/vnd.github.v3+json',
         },
-        next: { revalidate: 60 },
+        cache: 'no-store',
       }
     );
 
@@ -121,7 +120,7 @@ async function getPostFromGitHub(slug: string): Promise<Post | undefined> {
     }
 
     const contentResponse = await fetch(file.download_url, {
-      next: { revalidate: 60 },
+      cache: 'no-store',
     });
     
     if (!contentResponse.ok) {

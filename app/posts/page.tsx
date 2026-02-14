@@ -12,8 +12,6 @@ const titleStyle = {
     textAlign: "center" as const
 }
 
-export const revalidate = 60;
-
 export default async function PostsListPage() {
   // 在服务端获取数据
   const posts = await getAllPosts();

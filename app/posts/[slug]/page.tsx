@@ -10,8 +10,6 @@ import rehypeSlug from 'rehype-slug';
 import styles from './post.module.css';
 import WalineComment from 'components/comment';
 
-export const revalidate = 60;
-
 export async function generateStaticParams() {
   const posts = await getAllPosts();
   return posts.map(p => ({ slug: p.slug }));

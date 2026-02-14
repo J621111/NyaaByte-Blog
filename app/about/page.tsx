@@ -16,9 +16,14 @@ const getStrapiMedia = (url: string) => {
 async function getCardsData(): Promise<MasonryCardProps[]> {
     const baseUrl = process.env.NEXT_PUBLIC_STRAPI_URL;
     
+    // Skip fetching during static build if no base URL
+    if (!baseUrl || baseUrl.includes('localhost')) {
+        return [];
+    }
+    
     try {
         const result = await fetch(`${baseUrl}/api/information-cards?populate=*`, {
-            cache: 'no-store',
+            cache: 'force-cache',
         });
 
         if (!result.ok) {

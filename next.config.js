@@ -35,7 +35,8 @@ const config = {
       },
       { hostname: 'localhost' },
       { hostname: '127.0.0.1' },
-      { hostname: 'www.nyaabyte.com' }, 
+      { hostname: 'www.nyaabyte.com' },
+      { hostname: 'raw.githubusercontent.com' },
     ],
   },
 };
