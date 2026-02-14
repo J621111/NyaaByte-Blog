@@ -87,7 +87,7 @@ async function getPostsFromGitHub(): Promise<Post[]> {
       })
     );
 
-    return posts
+    return (posts as (Post | null)[])
       .filter((post): post is Post => post !== null)
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   } catch (error) {
