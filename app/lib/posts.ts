@@ -57,38 +57,38 @@ async function getPostsFromGitHub(): Promise<Post[]> {
 
     const mdxFiles = files.filter((file: any) => file.name.endsWith('.mdx'));
     
-    const posts = await Promise.all(
-      mdxFiles.map(async (file: any) => {
-        try {
-          const contentResponse = await fetch(file.download_url, {
-            cache: 'no-store',
-          });
-          
-          if (!contentResponse.ok) {
-            return null;
-          }
-
-          const content = await contentResponse.text();
-          const { data, content: body } = matter(content);
-          
-          return {
-            slug: file.name.replace(/\.mdx$/, ''),
-            title: data.title || 'Untitled',
-            date: data.date || new Date().toISOString(),
-            description: data.description || '',
-            content: body,
-            image: data.image,
-            tags: data.tags || [],
-          };
-        } catch (error) {
-          console.error(`Error fetching post ${file.name}:`, error);
-          return null;
+    const posts: Post[] = [];
+    
+    for (const file of mdxFiles) {
+      try {
+        const contentResponse = await fetch(file.download_url, {
+          cache: 'no-store',
+        });
+        
+        if (!contentResponse.ok) {
+          continue;
         }
-      })
-    );
 
-    return (posts.filter(post => post !== null) as Post[])
-      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+        const content = await contentResponse.text();
+        const { data, content: body } = matter(content);
+        
+        const post: Post = {
+          slug: file.name.replace(/\.mdx$/, ''),
+          title: data.title || 'Untitled',
+          date: data.date || new Date().toISOString(),
+          description: data.description || '',
+          content: body,
+          image: data.image,
+          tags: data.tags || [],
+        };
+        
+        posts.push(post);
+      } catch (error) {
+        console.error(`Error fetching post ${file.name}:`, error);
+      }
+    }
+
+    return posts.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   } catch (error) {
     console.error('Error fetching posts from GitHub:', error);
     return [];
